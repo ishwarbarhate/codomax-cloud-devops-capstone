@@ -1,0 +1,41 @@
+name: Cloud DevOps Capstone CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check Project Files
+        run: |
+          test -f index.html
+          test -f Dockerfile
+          test -f docker-compose.yml
+          echo "Project files verified"
+
+      - name: Build Docker Image
+        run: |
+          docker build -t codomax-capstone .
+
+      - name: Run Docker Container
+        run: |
+          docker run -d -p 8080:80 --name capstone-test codomax-capstone
+          sleep 5
+
+      - name: Test Web Application
+        run: |
+          curl -f http://localhost:8080
+          echo "Web application test successful"
+
+      - name: Stop Test Container
+        run: |
+          docker stop capstone-test
+          docker rm capstone-test
